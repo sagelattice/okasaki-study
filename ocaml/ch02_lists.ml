@@ -56,6 +56,10 @@ module TestStack (S: STACK) = struct
     assert (s ++ empty = s);
     assert (s ++ t = (cons 1 (cons 2 (cons 3 (cons 4 empty)))));
     assert (update s 0 0 = (cons 0 (cons 2 (cons 3 empty))));
+    assert (update s 1 0 = (cons 1 (cons 0 (cons 3 empty))));
+    assert (try ignore (update s 4 0); false with SUBSCRIPT -> true);
+    (* no mutation! *)
+    assert (s = cons 1 (cons 2 (cons 3 empty)));
     print_endline "passed"
 end
 
