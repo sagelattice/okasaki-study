@@ -66,8 +66,9 @@ end
 let () =
   let module T1 = TestStack(ListStack) in
   let module T2 = TestStack(CustomStack) in
+  print_endline "lists";
+  print_string "list stack: ";
   T1.run ();
+  print_string "custom stack: ";
   T2.run ()
-
-let () = print_endline "all tests passed"
 

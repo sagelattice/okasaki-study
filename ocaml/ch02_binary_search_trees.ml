@@ -62,7 +62,7 @@ end
 
 let () =
   let module T = TestSet(UnbalancedSet(IntOrder)) in
+  print_endline "binary search tree";
+  print_string "unbalanced set: ";
   T.run ()
-
-let () = print_endline "all tests passed"
 
