@@ -1,0 +1,9 @@
+(library
+  (name okasaki)
+  (modules ch02_binary_search_trees ch02_lists ch03_heaps))
+
+(test
+  (name run_tests)
+  (modules run_tests)
+  (libraries okasaki)
+  (link_flags (:standard -linkall)))
