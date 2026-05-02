@@ -15,26 +15,29 @@ module type ORDERED = sig
   val leq : t -> t -> bool
 end
 
-module UnbalancedSet (Element : ORDERED) : SET with type elem = Element.t = struct
+module UnbalancedSet (Element : ORDERED) : SET with type elem = Element.t =
+struct
   type elem = Element.t
   type tree = E | T of tree * elem * tree
   type set = tree
 
   let empty = E
 
-  let rec member x t = match t with
+  let rec member x t =
+    match t with
     | E -> false
     | T (left, y, right) ->
-       if Element.lt x y then member x left
-       else if Element.lt y x then member x right
-       else true
+        if Element.lt x y then member x left
+        else if Element.lt y x then member x right
+        else true
 
-  let rec insert x s = match s with
+  let rec insert x s =
+    match s with
     | E -> T (E, x, E)
     | T (left, y, right) ->
-       if Element.lt x y then T (insert x left, y, right)
-       else if Element.lt y x then T (left, y, insert x right)
-       else s
+        if Element.lt x y then T (insert x left, y, right)
+        else if Element.lt y x then T (left, y, insert x right)
+        else s
 end
 
 module IntOrder : ORDERED with type t = int = struct
@@ -56,13 +59,12 @@ module TestSet (S : SET with type elem = int) = struct
     (* not mutable *)
     assert (not (member 2 s));
     (* instance equality *)
-    assert (insert 1 s == s);
+    assert (insert 1 s = s);
     print_endline "passed"
 end
 
 let () =
-  let module T = TestSet(UnbalancedSet(IntOrder)) in
+  let module T = TestSet (UnbalancedSet (IntOrder)) in
   print_endline "binary search tree";
   print_string "unbalanced set: ";
   T.run ()
-
