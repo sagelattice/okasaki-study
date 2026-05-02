@@ -17,12 +17,9 @@ module RedBlackSet (Element : ORDERED) = struct
         else true
 
   let balance = function
-    | B, T (R, T (R, a, x, b), y, c), z, d ->
-        T (R, T (B, a, x, b), y, T (B, c, z, d))
-    | B, T (R, a, x, T (R, b, y, c)), z, d ->
-        T (R, T (B, a, x, b), y, T (B, c, z, d))
-    | B, a, x, T (R, T (R, b, y, c), z, d) ->
-        T (R, T (B, a, x, b), y, T (B, c, z, d))
+    | B, T (R, T (R, a, x, b), y, c), z, d
+    | B, T (R, a, x, T (R, b, y, c)), z, d
+    | B, a, x, T (R, T (R, b, y, c), z, d)
     | B, a, x, T (R, b, y, T (R, c, z, d)) ->
         T (R, T (B, a, x, b), y, T (B, c, z, d))
     | c, a, x, b -> T (c, a, x, b)
@@ -45,8 +42,9 @@ let () =
   print_string "red black set: ";
   let rec red_ok = function
     | RB.E -> true
-    | RB.T (RB.R, RB.T (RB.R, _, _, _), _, _) -> false
-    | RB.T (RB.R, _, _, RB.T (RB.R, _, _, _)) -> false
+    | RB.T (RB.R, RB.T (RB.R, _, _, _), _, _)
+    | RB.T (RB.R, _, _, RB.T (RB.R, _, _, _)) ->
+        false
     | RB.T (_, l, _, r) -> red_ok l && red_ok r
   in
   let rec black_height = function
