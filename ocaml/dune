@@ -1,6 +1,6 @@
 (library
   (name okasaki)
-  (modules ch02_binary_search_trees ch02_lists ch03_heaps ch03_red_black_trees))
+  (modules ch02_binary_search_trees ch02_lists ch03_heaps ch03_red_black_trees ch04_streams))
 
 (test
   (name run_tests)
