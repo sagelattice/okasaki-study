@@ -72,7 +72,7 @@ struct
     | ts1, [] -> ts1
     | [], ts2 -> ts2
     | (t1 :: ts1' as ts1), (t2 :: ts2' as ts2) ->
-        if rank t1 < rank t2 then t1 :: merge ts1 ts2
+        if rank t1 < rank t2 then t1 :: merge ts1' ts2
         else if rank t2 < rank t1 then t2 :: merge ts1 ts2'
         else insTree (link t1 t2) (merge ts1' ts2')
 
@@ -102,8 +102,12 @@ module TestHeap (H : HEAP with type Elem.t = int) = struct
     assert (findMin (deleteMin (insert 3 (insert 1 (insert 2 empty)))) = 2);
     let h1 = insert 3 (insert 1 empty) in
     let h2 = insert 4 (insert 2 empty) in
+    (* equal rank merge *)
     assert (findMin (merge h1 h2) = 1);
     assert (findMin (deleteMin (merge h1 h2)) = 2);
+    (* unequal rank merge *)
+    assert (findMin (merge (insert 1 empty) h2) = 1);
+    assert (findMin (merge h1 (insert 0 empty)) = 0);
     (* immutability *)
     let h = insert 1 empty in
     let _ = insert 0 h in
