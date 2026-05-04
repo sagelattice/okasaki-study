@@ -47,24 +47,3 @@ module IntOrder : ORDERED with type t = int = struct
   let lt x y = x < y
   let leq x y = x <= y
 end
-
-module TestSet (S : SET with type elem = int) = struct
-  let run () =
-    let open S in
-    let s = insert 1 empty in
-    assert (not (member 1 empty));
-    assert (member 1 s);
-    assert (member 1 (insert 2 s));
-    assert (member 2 (insert 2 s));
-    (* not mutable *)
-    assert (not (member 2 s));
-    (* instance equality *)
-    assert (insert 1 s = s);
-    print_endline "passed"
-end
-
-let () =
-  let module T = TestSet (UnbalancedSet (IntOrder)) in
-  print_endline "binary search tree";
-  print_string "unbalanced set: ";
-  T.run ()

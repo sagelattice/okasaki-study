@@ -2,8 +2,18 @@
   (name okasaki)
   (modules ch02_binary_search_trees ch02_lists ch03_heaps ch03_red_black_trees ch04_streams))
 
-(test
-  (name run_tests)
-  (modules run_tests)
-  (libraries okasaki)
+(tests
+  (names
+    test_ch02_lists
+    test_ch02_binary_search_trees
+    test_ch03_red_black_trees
+    test_ch03_heaps
+    test_ch04_streams)
+  (modules
+    test_ch02_lists
+    test_ch02_binary_search_trees
+    test_ch03_red_black_trees
+    test_ch03_heaps
+    test_ch04_streams)
+  (libraries okasaki alcotest)
   (link_flags (:standard -linkall)))

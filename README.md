@@ -18,6 +18,7 @@ Expectations:
 
 AI usage policy:
 - Review syntax or compilation errors (I'm not an OCaml or Rust expert at the time of starting this)
-- Recommend test cases but implement them myself
+- Mechanical reshaping of code I've already written, e.g. refactoring `assert` test cases into Alcotest
+- Generating unit tests against my implementations; I'd rather put time into understanding more data structures or working some of the proof exercises
 - Discuss or pressure-test observations, but only use my own words
 - The LLM harness will obviously use a frontier provider API

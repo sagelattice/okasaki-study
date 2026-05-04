@@ -91,38 +91,3 @@ struct
     let Node (_, _, ts1), ts2 = removeMinTree ts in
     merge (List.rev ts1) ts2
 end
-
-module TestHeap (H : HEAP with type Elem.t = int) = struct
-  let run () =
-    let open H in
-    assert (isEmpty empty);
-    assert (not (isEmpty (insert 1 empty)));
-    assert (findMin (insert 1 empty) = 1);
-    assert (findMin (insert 3 (insert 1 (insert 2 empty))) = 1);
-    assert (findMin (deleteMin (insert 3 (insert 1 (insert 2 empty)))) = 2);
-    let h1 = insert 3 (insert 1 empty) in
-    let h2 = insert 4 (insert 2 empty) in
-    (* equal rank merge *)
-    assert (findMin (merge h1 h2) = 1);
-    assert (findMin (deleteMin (merge h1 h2)) = 2);
-    (* unequal rank merge *)
-    assert (findMin (merge (insert 1 empty) h2) = 1);
-    assert (findMin (merge h1 (insert 0 empty)) = 0);
-    (* immutability *)
-    let h = insert 1 empty in
-    let _ = insert 0 h in
-    assert (findMin h = 1);
-    let h = insert 2 (insert 1 empty) in
-    let _ = deleteMin h in
-    assert (findMin h = 1);
-    print_endline "passed"
-end
-
-let () =
-  let module T1 = TestHeap (LeftistHeap (IntOrder)) in
-  let module T2 = TestHeap (BinomialHeap (IntOrder)) in
-  print_endline "heaps";
-  print_string "leftist heap: ";
-  T1.run ();
-  print_string "binomial heap: ";
-  T2.run ()

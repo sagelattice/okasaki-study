@@ -53,20 +53,3 @@ module Stream : STREAM = struct
     in
     to_list' s []
 end
-
-let () =
-  let xs = [ 1; 2; 3 ] in
-  let s = Stream.of_list xs in
-  print_string "streams: ";
-  assert (xs = Stream.to_list s);
-  assert (List.drop 1 xs = Stream.to_list (Stream.drop 1 s));
-  assert ([] = Stream.to_list (Stream.drop 42 s));
-  assert (List.drop 0 xs = Stream.to_list (Stream.drop 0 s));
-  assert (List.take 1 xs = Stream.to_list (Stream.take 1 s));
-  assert (xs = Stream.to_list (Stream.take 42 s));
-  assert (List.take 0 xs = Stream.to_list (Stream.take 0 s));
-  assert (List.rev xs = Stream.to_list (Stream.reverse s));
-  assert ([ 1; 2; 3; 4 ] = Stream.(to_list (s ++ of_list [ 4 ])));
-  assert (xs = Stream.(to_list (s ++ lazy Nil)));
-  assert (xs = Stream.(to_list (lazy Nil ++ s)));
-  print_endline "passed"

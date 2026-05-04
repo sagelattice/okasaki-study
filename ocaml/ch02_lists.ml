@@ -41,35 +41,3 @@ module StackOps (S : STACK) = struct
     else if i = 0 then cons y (tail s)
     else cons (head s) (update (tail s) (i - 1) y)
 end
-
-module TestStack (S : STACK) = struct
-  module Ops = StackOps (S)
-
-  let run () =
-    let open S in
-    let open Ops in
-    let s = cons 1 (cons 2 (cons 3 empty)) in
-    let t = cons 4 empty in
-    assert (empty ++ s = s);
-    assert (s ++ empty = s);
-    assert (s ++ t = cons 1 (cons 2 (cons 3 (cons 4 empty))));
-    assert (update s 0 0 = cons 0 (cons 2 (cons 3 empty)));
-    assert (update s 1 0 = cons 1 (cons 0 (cons 3 empty)));
-    assert (
-      try
-        ignore (update s 4 0);
-        false
-      with SUBSCRIPT -> true);
-    (* no mutation! *)
-    assert (s = cons 1 (cons 2 (cons 3 empty)));
-    print_endline "passed"
-end
-
-let () =
-  let module T1 = TestStack (ListStack) in
-  let module T2 = TestStack (CustomStack) in
-  print_endline "lists";
-  print_string "list stack: ";
-  T1.run ();
-  print_string "custom stack: ";
-  T2.run ()
