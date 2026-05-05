@@ -1,24 +1,25 @@
 # okasaki-study
 
-Developing ocaml:
+## Developing OCaml:
 
-- dune and an ocaml compiler
-- Tests are simple functors over data structure variants with `assert`
-> dune test --no-buffer
+- dune and an OCaml compiler
+- Tests are written with Alcotest
 
-Goals:
+> dune test
+
+## Goals:
 
 - A tour of Purely Functional Data Structures by Chris Okasaki in idiomatic modern OCaml
 - Do the same tour in Rust once I validate I understand the algorithms
-- Use the Rust implementation to create a persistent search tree with subtree refs cached in a map to analyze chess positions driven by LLM exploration. It wont beat Stockfish or AlphaZero but it will demo practical immutable data in an agentic system.
+- Use the Rust implementation to build persistent, replayable evaluation infrastructure for LLM prompt strategies with chess as a problem domain. Analyze chess positions through LLM exploration that leverages the same persistent data structures for efficiency. Compare LLM agents to each other and Stockfish as a ground truth.
 
-Expectations:
+## Expectations:
 - Write all of the implementation code myself
 - Exceptions and deviations are noted in chapter-level notes
 
-AI usage policy:
-- Review syntax or compilation errors (I'm not an OCaml or Rust expert at the time of starting this)
-- Mechanical reshaping of code I've already written, e.g. refactoring `assert` test cases into Alcotest
-- Generating unit tests against my implementations; I'd rather put time into understanding more data structures or working some of the proof exercises
-- Discuss or pressure-test observations, but only use my own words
-- The LLM harness will obviously use a frontier provider API
+## AI usage principles (premise; conclusion):
+- This project is a study to expand my knowledge and skills; ideas, logic, systems must be my own
+- Time is a resource that must be protected; use AI for mechanistic concerns e.g. language toolchain setup, unit test implementation, syntax or compilation issues
+- Learning is a skill that can be improved; AI can boost learning rate by stress-testing ideas
+- Writing is a skill that can be improved; AI can critique writing from different perspectives
+- Principles are often expressed as universals and exceptions can be rationalized; note the exceptions

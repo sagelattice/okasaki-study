@@ -1,6 +1,11 @@
 (library
   (name okasaki)
-  (modules ch02_binary_search_trees ch02_lists ch03_heaps ch03_red_black_trees ch04_streams))
+  (modules ch02_binary_search_trees ch02_lists ch03_heaps ch03_red_black_trees ch04_streams ch05_amortization))
+
+(library
+  (name okasaki_test_helpers)
+  (libraries okasaki alcotest)
+  (modules heap_test_helpers))
 
 (tests
   (names
@@ -8,12 +13,14 @@
     test_ch02_binary_search_trees
     test_ch03_red_black_trees
     test_ch03_heaps
-    test_ch04_streams)
+    test_ch04_streams
+    test_ch05_amortization)
   (modules
     test_ch02_lists
     test_ch02_binary_search_trees
     test_ch03_red_black_trees
     test_ch03_heaps
-    test_ch04_streams)
-  (libraries okasaki alcotest)
+    test_ch04_streams
+    test_ch05_amortization)
+  (libraries okasaki okasaki_test_helpers alcotest)
   (link_flags (:standard -linkall)))
