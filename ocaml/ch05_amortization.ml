@@ -30,7 +30,8 @@ module BatchedQueue : QUEUE = struct
   let tail = function [], _ -> raise EMPTY | _ :: f, r -> checkf (f, r)
 end
 
-module SplayHeap (Element : ORDERED) : HEAP with type Elem.t = Element.t = struct
+module SplayHeap (Element : ORDERED) : HEAP with type Elem.t = Element.t =
+struct
   module Elem = Element
 
   type heap = E | T of heap * Elem.t * heap
