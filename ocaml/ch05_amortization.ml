@@ -88,3 +88,31 @@ struct
     | T (T (E, _, b), y, c) -> T (b, y, c)
     | T (T (a, x, b), y, c) -> T (delete_min a, x, T (b, y, c))
 end
+
+module PairingHeap (Element : ORDERED) : HEAP with type Elem.t = Element.t =
+struct
+  module Elem = Element
+
+  type heap = E | T of Elem.t * heap list
+
+  exception EMPTY
+
+  let empty = E
+  let is_empty = function E -> true | _ -> false
+
+  let merge s t =
+    match (s, t) with
+    | h, E | E, h -> h
+    | (T (x, hs1) as h1), (T (y, hs2) as h2) ->
+        if Elem.leq x y then T (x, h2 :: hs1) else T (y, h1 :: hs2)
+
+  let insert x h = merge (T (x, [])) h
+
+  let rec merge_pairs = function
+    | [] -> E
+    | [ h ] -> h
+    | h1 :: h2 :: hs -> merge (merge h1 h2) (merge_pairs hs)
+
+  let find_min = function E -> raise EMPTY | T (x, _) -> x
+  let delete_min = function E -> raise EMPTY | T (_, hs) -> merge_pairs hs
+end

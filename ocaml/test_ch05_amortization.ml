@@ -60,10 +60,12 @@ let queue_tests =
     ]
 
 module SHT = HeapTests (Ch05_amortization.SplayHeap (Ch02_binary_search_trees.IntOrder))
+module PHT = HeapTests (Ch05_amortization.PairingHeap (Ch02_binary_search_trees.IntOrder))
 
 let () =
   Alcotest.run "ch05 queues"
     [
       ("BatchedQueue", queue_tests);
       ("SplayHeap",    SHT.tests);
+      ("PairingHeap",  PHT.tests);
     ]
