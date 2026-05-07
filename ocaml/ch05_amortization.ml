@@ -1,17 +1,4 @@
-open Ch02_binary_search_trees
-open Ch03_heaps
-
-module type QUEUE = sig
-  type 'a queue
-
-  exception EMPTY
-
-  val empty : 'a queue
-  val is_empty : 'a queue -> bool
-  val snoc : 'a queue -> 'a -> 'a queue
-  val head : 'a queue -> 'a
-  val tail : 'a queue -> 'a queue
-end
+open Sigs
 
 module BatchedQueue : QUEUE = struct
   type 'a queue = 'a list * 'a list

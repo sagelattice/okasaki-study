@@ -1,16 +1,4 @@
-module type STREAM = sig
-  type 'a stream_cell = Nil | Cons of 'a * 'a stream
-  and 'a stream = 'a stream_cell Lazy.t
-
-  val ( ++ ) : 'a stream -> 'a stream -> 'a stream
-  val take : int -> 'a stream -> 'a stream
-  val drop : int -> 'a stream -> 'a stream
-  val reverse : 'a stream -> 'a stream
-
-  (* the book doesn't define these and I added them for testing *)
-  val of_list : 'a list -> 'a stream
-  val to_list : 'a stream -> 'a list
-end
+open Sigs
 
 module Stream : STREAM = struct
   type 'a stream_cell = Nil | Cons of 'a * 'a stream

@@ -1,6 +1,6 @@
 open Okasaki
 
-module SetTests (S : Ch02_binary_search_trees.SET with type elem = int) = struct
+module SetTests (S : Sigs.SET with type elem = int) = struct
   open S
 
   (* the empty set contains no elements *)

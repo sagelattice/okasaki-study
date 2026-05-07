@@ -1,6 +1,7 @@
 (library
   (name okasaki)
   (modules
+    sigs
     ch02_binary_search_trees
     ch02_lists
     ch03_heaps

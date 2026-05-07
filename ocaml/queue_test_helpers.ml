@@ -1,6 +1,6 @@
 open Okasaki
 
-module QueueTests (Q : Ch05_amortization.QUEUE) = struct
+module QueueTests (Q : Sigs.QUEUE) = struct
   open Q
 
   let to_list q =

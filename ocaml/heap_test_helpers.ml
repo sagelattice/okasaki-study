@@ -1,6 +1,6 @@
 open Okasaki
 
-module HeapTests (H : Ch03_heaps.HEAP with type Elem.t = int) = struct
+module HeapTests (H : Sigs.HEAP with type Elem.t = int) = struct
   open H
 
   let test_empty_is_empty () =

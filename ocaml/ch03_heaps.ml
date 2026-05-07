@@ -1,19 +1,4 @@
-open Ch02_binary_search_trees
-
-module type HEAP = sig
-  module Elem : ORDERED
-
-  exception EMPTY
-
-  type heap
-
-  val empty : heap
-  val is_empty : heap -> bool
-  val insert : Elem.t -> heap -> heap
-  val merge : heap -> heap -> heap
-  val find_min : heap -> Elem.t
-  val delete_min : heap -> heap
-end
+open Sigs
 
 module LeftistHeap (Element : ORDERED) : HEAP with type Elem.t = Element.t =
 struct

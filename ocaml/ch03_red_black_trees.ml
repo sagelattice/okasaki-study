@@ -1,4 +1,4 @@
-open Ch02_binary_search_trees
+open Sigs
 
 module RedBlackSet (Element : ORDERED) = struct
   type elem = Element.t

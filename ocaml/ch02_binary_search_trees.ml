@@ -1,19 +1,4 @@
-module type SET = sig
-  type elem
-  type set
-
-  val empty : set
-  val insert : elem -> set -> set
-  val member : elem -> set -> bool
-end
-
-module type ORDERED = sig
-  type t
-
-  val eq : t -> t -> bool
-  val lt : t -> t -> bool
-  val leq : t -> t -> bool
-end
+open Sigs
 
 module UnbalancedSet (Element : ORDERED) : SET with type elem = Element.t =
 struct
