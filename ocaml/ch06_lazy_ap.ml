@@ -62,8 +62,8 @@ module LazyBinomialHeap (Element : ORDERED) :
         else if rank t' < rank s' then t' :: mrg s ts'
         else ins_tree (link s' t') (mrg ss' ts')
 
-  let insert x (lazy ts) = lazy (ins_tree (Node (0, x, [])) ts)
-  let merge (lazy s) (lazy t) = lazy (mrg s t)
+  let insert x ts = lazy (ins_tree (Node (0, x, [])) (Lazy.force ts))
+  let merge s t = lazy (mrg (Lazy.force s) (Lazy.force t))
 
   let rec remove_min_tree = function
     | [] -> raise EMPTY
@@ -72,11 +72,11 @@ module LazyBinomialHeap (Element : ORDERED) :
         let t', ts' = remove_min_tree ts in
         if Elem.leq (root t) (root t') then (t, ts) else (t', t :: ts')
 
-  let find_min (lazy ts) =
-    let t, _ = remove_min_tree ts in
+  let find_min ts =
+    let t, _ = remove_min_tree (Lazy.force ts) in
     root t
 
-  let delete_min (lazy ts) =
-    let Node (_, _, ts1), ts2 = remove_min_tree ts in
+  let delete_min ts =
+    let Node (_, _, ts1), ts2 = remove_min_tree (Lazy.force ts) in
     lazy (mrg (List.rev ts1) ts2)
 end
