@@ -9,7 +9,8 @@
     ch03_red_black_trees
     ch04_streams
     ch05_amortization
-    ch06_lazy_ap))
+    ch06_lazy_ap
+    ch07_eliminating_amortization))
 
 (library
   (name okasaki_test_helpers)
@@ -24,7 +25,8 @@
     test_ch03_heaps
     test_ch04_streams
     test_ch05_amortization
-    test_ch06_lazy_ap)
+    test_ch06_lazy_ap
+    test_ch07_eliminating_amortization)
   (modules
     test_ch02_lists
     test_ch02_binary_search_trees
@@ -32,6 +34,7 @@
     test_ch03_heaps
     test_ch04_streams
     test_ch05_amortization
-    test_ch06_lazy_ap)
+    test_ch06_lazy_ap
+    test_ch07_eliminating_amortization)
   (libraries okasaki okasaki_test_helpers alcotest)
   (link_flags (:standard -linkall)))
