@@ -72,11 +72,43 @@ module LazyBinomialHeap (Element : ORDERED) :
         let t', ts' = remove_min_tree ts in
         if Elem.leq (root t) (root t') then (t, ts) else (t', t :: ts')
 
-  let find_min ts =
-    let t, _ = remove_min_tree (Lazy.force ts) in
+  let find_min (lazy ts) =
+    let t, _ = remove_min_tree ts in
     root t
 
   let delete_min ts =
     let Node (_, _, ts1), ts2 = remove_min_tree (Lazy.force ts) in
     lazy (mrg (List.rev ts1) ts2)
+end
+
+module PhysicistsQueue : QUEUE = struct
+  type 'a queue = 'a list * int * 'a list Lazy.t * int * 'a list
+
+  exception EMPTY
+
+  let empty = ([], 0, lazy [], 0, [])
+  let is_empty (_, lenf, _, _, _) = lenf = 0
+
+  let checkw = function
+    | [], lenf, f, lenr, r -> (Lazy.force f, lenf, f, lenr, r)
+    | q -> q
+
+  let check q =
+    match q with
+    | _, lenf, f, lenr, r ->
+        if lenr <= lenf then checkw q
+        else
+          let (lazy f') = f in
+          checkw (f', lenf + lenr, lazy (f' @ List.rev r), 0, [])
+
+  let snoc q x =
+    let w, lenf, f, lenr, r = q in
+    check (w, lenf, f, lenr + 1, x :: r)
+
+  let head = function [], _, _, _, _ -> raise EMPTY | x :: _, _, _, _, _ -> x
+
+  let tail = function
+    | [], _, _, _, _ -> raise EMPTY
+    | _ :: w, lenf, f, lenr, r ->
+        check (w, lenf - 1, lazy (List.tl (Lazy.force f)), lenr, r)
 end
