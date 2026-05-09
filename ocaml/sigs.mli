@@ -6,7 +6,6 @@ module type STREAM = sig
   val take : int -> 'a stream -> 'a stream
   val drop : int -> 'a stream -> 'a stream
   val reverse : 'a stream -> 'a stream
-
   val of_list : 'a list -> 'a stream
   val to_list : 'a stream -> 'a list
 end
@@ -53,4 +52,14 @@ module type QUEUE = sig
   val snoc : 'a queue -> 'a -> 'a queue
   val head : 'a queue -> 'a
   val tail : 'a queue -> 'a queue
+end
+
+module type SORTABLE = sig
+  module Elem : ORDERED
+
+  type sortable
+
+  val empty : sortable
+  val add : Elem.t -> sortable -> sortable
+  val sort : sortable -> Elem.t list
 end

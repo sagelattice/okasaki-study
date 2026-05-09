@@ -112,3 +112,34 @@ module PhysicistsQueue : QUEUE = struct
     | _ :: w, lenf, f, lenr, r ->
         check (w, lenf - 1, lazy (List.tl (Lazy.force f)), lenr, r)
 end
+
+module BottomUpMergeSort (Element : ORDERED) :
+  SORTABLE with type Elem.t = Element.t = struct
+  module Elem = Element
+
+  type sortable = int * Elem.t list list Lazy.t
+
+  let rec mrg xs ys =
+    match (xs, ys) with
+    | [], _ -> ys
+    | _, [] -> xs
+    | x :: xs', y :: ys' ->
+        if Elem.leq x y then x :: mrg xs' ys else y :: mrg xs ys'
+
+  let empty = (0, lazy [])
+
+  let add x (size, segs) =
+    let rec add_seg (seg, segs, size) =
+      if size mod 2 = 0 then seg :: segs
+      else add_seg (mrg seg (List.hd segs), List.tl segs, size / 2)
+    in
+    (size + 1, lazy (add_seg ([ x ], Lazy.force segs, size)))
+
+  let sort (_, (lazy segs)) =
+    let rec mrg_all xs ys =
+      match (xs, ys) with
+      | xs, [] -> xs
+      | xs, seg :: segs -> mrg_all (mrg xs seg) segs
+    in
+    mrg_all [] segs
+end
