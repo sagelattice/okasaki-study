@@ -1,5 +1,6 @@
 (library
   (name okasaki)
+  (modules_without_implementation sigs)
   (modules
     sigs
     ch02_binary_search_trees
