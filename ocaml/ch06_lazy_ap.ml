@@ -110,7 +110,7 @@ module PhysicistsQueue : QUEUE = struct
   let tail = function
     | [], _, _, _, _ -> raise EMPTY
     | _ :: w, lenf, f, lenr, r ->
-        check (w, lenf - 1, lazy (List.tl (Lazy.force f)), lenr, r)
+        check (w, lenf - 1, Lazy.map List.tl f, lenr, r)
 end
 
 module BottomUpMergeSort (Element : ORDERED) :

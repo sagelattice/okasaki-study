@@ -11,7 +11,6 @@
 
 - A tour of Purely Functional Data Structures by Chris Okasaki in idiomatic modern OCaml
 - Do the same tour in Rust once I validate I understand the algorithms
-- Use the Rust implementation to build persistent, replayable evaluation infrastructure for LLM prompt strategies with chess as a problem domain. Analyze chess positions through LLM exploration that leverages the same persistent data structures. Compare LLM agents to Stockfish as a ground truth and construct ELO ranks against each other.
 
 ## Expectations:
 - Write all of the implementation code myself
