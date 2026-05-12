@@ -43,13 +43,15 @@ module ScheduledBinomialHeap (Element : ORDERED) (S : STREAM) :
   type schedule = digit stream list
   type heap = digit stream * schedule
 
+  exception EMPTY
+
   let empty = (lazy Nil, [])
   let is_empty = function (lazy Nil), _ -> true | _ -> false
 
   let link s t =
     let (Node (x1, c1)) = s in
     let (Node (x2, c2)) = t in
-    if Elem.leq x1 x2 then Node (x1, s :: c1) else Node (x2, t :: c2)
+    if Elem.leq x1 x2 then Node (x1, t :: c1) else Node (x2, s :: c2)
 
   let rec ins_tree s t =
     match t with
@@ -67,4 +69,43 @@ module ScheduledBinomialHeap (Element : ORDERED) (S : STREAM) :
         lazy (Cons (d, mrg s' t'))
     | (lazy (Cons (One x, s'))), (lazy (Cons (One y, t'))) ->
         lazy (Cons (Zero, ins_tree (link x y) (mrg s' t')))
+
+  let rec normalize = function
+    | (lazy Nil) as ds -> ds
+    | (lazy (Cons (_, ds'))) as ds ->
+        ignore (normalize ds');
+        ds
+
+  let exec = function
+    | [] -> []
+    | (lazy (Cons (Zero, job))) :: sched -> job :: sched
+    | _ :: sched -> sched
+
+  let insert x (ds, sched) =
+    let ds' = ins_tree (Node (x, [])) ds in
+    (ds', exec (exec (ds' :: sched)))
+
+  let merge (ds1, _) (ds2, _) =
+    let ds = normalize (mrg ds1 ds2) in
+    (ds, [])
+
+  let rec remove_min_tree = function
+    | (lazy Nil) -> raise EMPTY
+    | (lazy (Cons (One t, (lazy Nil)))) -> (t, lazy Nil)
+    | (lazy (Cons (Zero, ds))) ->
+        let t', ds' = remove_min_tree ds in
+        (t', lazy (Cons (Zero, ds')))
+    | (lazy (Cons (One (Node (x, _) as t), ds))) ->
+        let (Node (x', _) as t'), ds' = remove_min_tree ds in
+        if Elem.leq x x' then (t, lazy (Cons (Zero, ds)))
+        else (t', lazy (Cons (One t, ds')))
+
+  let find_min (ds, _) =
+    let Node (x, _), _ = remove_min_tree ds in
+    x
+
+  let delete_min (ds, _) =
+    let Node (_, c), ds' = remove_min_tree ds in
+    let ds'' = mrg (of_list List.(map (fun t -> One t) (rev c))) ds' in
+    (normalize ds'', [])
 end
