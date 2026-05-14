@@ -109,3 +109,48 @@ module ScheduledBinomialHeap (Element : ORDERED) (S : STREAM) :
     let ds'' = mrg (of_list List.(map (fun t -> One t) (rev c))) ds' in
     (normalize ds'', [])
 end
+
+module ScheduledBottomUpMergeSort (Element : ORDERED) (S : STREAM) :
+  SORTABLE with type Elem.t = Element.t = struct
+  open S
+  module Elem = Element
+
+  type schedule = Elem.t stream list
+  type sortable = int * (Elem.t stream * schedule) list
+
+  let rec mrg xs ys =
+    match (xs, ys) with
+    | (lazy Nil), _ -> ys
+    | _, (lazy Nil) -> xs
+    | (lazy (Cons (x, xs'))), (lazy (Cons (y, ys'))) ->
+        if Elem.leq x y then lazy (Cons (x, mrg xs' ys))
+        else lazy (Cons (y, mrg xs ys'))
+
+  let rec exec1 = function
+    | [] -> []
+    | (lazy Nil) :: sched -> exec1 sched
+    | (lazy (Cons (_, xs))) :: sched -> xs :: sched
+
+  let exec2 (xs, sched) = (xs, exec1 (exec1 sched))
+  let empty = (0, [])
+
+  let add x (size, segs) =
+    let rec add_seg xs segs size rsched =
+      if size mod 2 = 0 then (xs, List.rev rsched) :: segs
+      else
+        match segs with
+        | (xs', []) :: segs' ->
+            let xs'' = mrg xs xs' in
+            add_seg xs'' segs' (size / 2) (xs'' :: rsched)
+        | _ -> assert false
+    in
+    let segs' = add_seg (lazy (Cons (x, lazy Nil))) segs size [] in
+    (size + 1, List.map exec2 segs')
+
+  let sort (_, segs) =
+    let rec mrg_all = function
+      | xs, [] -> xs
+      | xs, (xs', _) :: segs -> mrg_all (mrg xs xs', segs)
+    in
+    to_list (mrg_all (lazy Nil, segs))
+end
