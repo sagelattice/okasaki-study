@@ -1,3 +1,7 @@
+module type CONST_INT = sig
+  val c : int
+end
+
 module type STREAM = sig
   type 'a stream_cell = Nil | Cons of 'a * 'a stream
   and 'a stream = 'a stream_cell Lazy.t
@@ -52,6 +56,21 @@ module type QUEUE = sig
   val snoc : 'a queue -> 'a -> 'a queue
   val head : 'a queue -> 'a
   val tail : 'a queue -> 'a queue
+end
+
+module type DEQUE = sig
+  type 'a queue
+
+  exception EMPTY
+
+  val empty : 'a queue
+  val is_empty : 'a queue -> bool
+  val cons : 'a -> 'a queue -> 'a queue
+  val head : 'a queue -> 'a
+  val tail : 'a queue -> 'a queue
+  val snoc : 'a queue -> 'a -> 'a queue
+  val last : 'a queue -> 'a
+  val init : 'a queue -> 'a queue
 end
 
 module type SORTABLE = sig

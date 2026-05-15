@@ -38,16 +38,63 @@ module HoodMelvilleQueue : QUEUE = struct
 
   let empty = (0, [], Idle, 0, [])
   let is_empty (lenf, _, _, _, _) = lenf = 0
-
-  let snoc (lenf, f, state, lenr, r) x =
-    check (lenf, f, state, lenr + 1, x :: r)
-
-  let head = function
-    | _, [], _, _, _ -> raise EMPTY
-    | _, x :: _, _, _, _ -> x
+  let snoc (lenf, f, state, lenr, r) x = check (lenf, f, state, lenr + 1, x :: r)
+  let head = function _, [], _, _, _ -> raise EMPTY | _, x :: _, _, _, _ -> x
 
   let tail = function
     | _, [], _, _, _ -> raise EMPTY
     | lenf, _ :: f, state, lenr, r ->
         check (lenf - 1, f, invalidate state, lenr, r)
+end
+
+module BankersDeque (C : CONST_INT) (S : STREAM) : DEQUE = struct
+  open S
+
+  let c = C.c
+
+  type 'a queue = int * 'a stream * int * 'a stream
+
+  exception EMPTY
+
+  let empty = (0, lazy Nil, 0, lazy Nil)
+  let is_empty (lenf, _, lenr, _) = lenf + lenr = 0
+
+  let check ((lenf, f, lenr, r) as q) =
+    if lenf > (c * lenr) + 1 then
+      let i = (lenf + lenr) / 2 in
+      let j = lenf + lenr - i in
+      let f' = take i f in
+      let r' = r ++ reverse (drop i f) in
+      (i, f', j, r')
+    else if lenr > (c * lenf) + 1 then
+      let j = (lenf + lenr) / 2 in
+      let i = lenf + lenr - j in
+      let r' = take j r in
+      let f' = f ++ reverse (drop j r) in
+      (i, f', j, r')
+    else q
+
+  let cons x (lenf, f, lenr, r) = check (lenf + 1, lazy (Cons (x, f)), lenr, r)
+
+  let head = function
+    | _, (lazy Nil), _, (lazy Nil) -> raise EMPTY
+    | _, (lazy Nil), _, (lazy (Cons (x, _))) -> x
+    | _, (lazy (Cons (x, _))), _, _ -> x
+
+  let tail = function
+    | _, (lazy Nil), _, (lazy Nil) -> raise EMPTY
+    | _, (lazy Nil), _, (lazy (Cons (_, _))) -> empty
+    | lenf, (lazy (Cons (_, f'))), lenr, r -> check (lenf - 1, f', lenr, r)
+
+  let snoc (lenf, f, lenr, r) x = check (lenf, f, lenr + 1, lazy (Cons (x, r)))
+
+  let last = function
+    | _, (lazy Nil), _, (lazy Nil) -> raise EMPTY
+    | _, (lazy (Cons (x, _))), _, (lazy Nil) -> x
+    | _, _, _, (lazy (Cons (x, _))) -> x
+
+  let init = function
+    | _, (lazy Nil), _, (lazy Nil) -> raise EMPTY
+    | _, (lazy (Cons (_, _))), _, (lazy Nil) -> empty
+    | lenf, f, lenr, (lazy (Cons (_, r'))) -> check (lenf, f, lenr - 1, r')
 end
