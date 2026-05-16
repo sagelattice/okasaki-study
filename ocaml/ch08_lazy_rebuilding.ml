@@ -98,3 +98,75 @@ module BankersDeque (C : CONST_INT) (S : STREAM) : DEQUE = struct
     | _, (lazy (Cons (_, _))), _, (lazy Nil) -> empty
     | lenf, f, lenr, (lazy (Cons (_, r'))) -> check (lenf, f, lenr - 1, r')
 end
+
+module RealTimeDeque (C : CONST_INT) (S : STREAM) : DEQUE = struct
+  open S
+
+  let c = C.c
+
+  type 'a queue = int * 'a stream * 'a stream * int * 'a stream * 'a stream
+
+  exception EMPTY
+
+  let empty = (0, lazy Nil, lazy Nil, 0, lazy Nil, lazy Nil)
+  let is_empty (lenf, _, _, lenr, _, _) = lenf + lenr = 0
+  let exec1 = function (lazy (Cons (_, s))) -> s | s -> s
+  let exec2 s = exec1 (exec1 s)
+
+  let rec rotate_rev s r a =
+    match s with
+    | (lazy Nil) -> reverse r ++ a
+    | (lazy (Cons (x, f))) ->
+        lazy (Cons (x, rotate_rev f (drop c r) (reverse (take c r)) ++ a))
+
+  let rec rotate_drop f j r =
+    if j < c then rotate_rev f (drop j r) (lazy Nil)
+    else
+      match f with
+      | (lazy (Cons (x, f'))) ->
+          lazy (Cons (x, rotate_drop f' (j - c) (drop c r)))
+      | (lazy Nil) -> assert false
+
+  let check ((lenf, f, _, lenr, r, _) as q) =
+    if lenf > (c * lenr) + 1 then
+      let i = (lenf + lenr) / 2 in
+      let j = lenf + lenr - i in
+      let f' = take i f in
+      let r' = rotate_drop r i f in
+      (i, f', f', j, r', r')
+    else if lenr > (c * lenf) + 1 then
+      let j = (lenf + lenr) / 2 in
+      let i = lenf + lenr - j in
+      let r' = take j r in
+      let f' = rotate_drop f j r in
+      (i, f', f', j, r', r')
+    else q
+
+  let cons x (lenf, f, sf, lenr, r, sr) =
+    check (lenf + 1, lazy (Cons (x, f)), exec1 sf, lenr, r, exec1 sr)
+
+  let head = function
+    | _, (lazy Nil), _, _, (lazy Nil), _ -> raise EMPTY
+    | _, (lazy Nil), _, _, (lazy (Cons (x, _))), _ -> x
+    | _, (lazy (Cons (x, _))), _, _, _, _ -> x
+
+  let tail = function
+    | _, (lazy Nil), _, _, (lazy Nil), _ -> raise EMPTY
+    | _, (lazy Nil), _, _, (lazy (Cons (_, _))), _ -> empty
+    | lenf, (lazy (Cons (_, f'))), sf, lenr, r, sr ->
+        check (lenf - 1, f', exec2 sf, lenr, r, exec2 sr)
+
+  let snoc (lenf, f, sf, lenr, r, sr) x =
+    check (lenf, f, exec1 sf, lenr + 1, lazy (Cons (x, r)), exec1 sr)
+
+  let last = function
+    | _, (lazy Nil), _, _, (lazy Nil), _ -> raise EMPTY
+    | _, (lazy (Cons (x, _))), _, _, (lazy Nil), _ -> x
+    | _, _, _, _, (lazy (Cons (x, _))), _ -> x
+
+  let init = function
+    | _, (lazy Nil), _, _, (lazy Nil), _ -> raise EMPTY
+    | _, (lazy (Cons (_, _))), _, _, (lazy Nil), _ -> empty
+    | lenf, f, sf, lenr, (lazy (Cons (_, r'))), sr ->
+        check (lenf, f, exec2 sf, lenr - 1, r', exec2 sr)
+end

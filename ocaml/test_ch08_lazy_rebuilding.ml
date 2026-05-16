@@ -9,6 +9,13 @@ end
 module BDQ =
   DequeTests (Ch08_lazy_rebuilding.BankersDeque (C3) (Ch04_streams.Stream))
 
+module RTDQ =
+  DequeTests (Ch08_lazy_rebuilding.RealTimeDeque (C3) (Ch04_streams.Stream))
+
 let () =
   Alcotest.run "ch08"
-    [ ("HoodMelvilleQueue", HMQ.tests); ("BankersDeque", BDQ.tests) ]
+    [
+      ("HoodMelvilleQueue", HMQ.tests);
+      ("BankersDeque", BDQ.tests);
+      ("RealTimeDeque", RTDQ.tests);
+    ]
