@@ -1,4 +1,4 @@
-name: tests/ocaml
+name: tests
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  ocaml:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,3 +18,11 @@ jobs:
       - run: opam install . --deps-only --with-test -y
 
       - run: opam exec -- dune test
+
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: cargo test
+        working-directory: rust
