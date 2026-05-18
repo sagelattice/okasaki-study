@@ -11,23 +11,11 @@ pub trait Stack<T>: Sized {
 #[derive(Clone, PartialEq, Debug)]
 enum Node<T> {
     Nil,
-    Cons(T, Rc<Node<T>>),
+    Cons(T, Rc<Self>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct CustomStack<T>(Rc<Node<T>>);
-
-impl<T: PartialEq> PartialEq for CustomStack<T> {
-    fn eq(&self, other: &Self) -> bool {
-        *self.0 == *other.0
-    }
-}
-
-impl<T> Clone for CustomStack<T> {
-    fn clone(&self) -> Self {
-        CustomStack(Rc::clone(&self.0))
-    }
-}
 
 impl<T> Stack<T> for CustomStack<T> {
     fn empty() -> Self {
