@@ -5,42 +5,54 @@ pub trait Stack<T>: Sized {
     fn is_empty(&self) -> bool;
     fn cons(head: T, tail: &Self) -> Self;
     fn head(&self) -> Option<&T>;
-    fn tail(&self) -> Option<Self>;
+    fn tail(&self) -> Option<&Self>;
+    fn rev(&self) -> Self;
 }
 
 #[derive(Clone, PartialEq, Debug)]
-enum Node<T> {
-    Nil,
-    Cons(T, Rc<Self>),
+struct Node<T> {
+    head: T,
+    tail: CustomStack<T>,
 }
 
-#[derive(Debug, PartialEq)]
-pub struct CustomStack<T>(Rc<Node<T>>);
+#[derive(Clone, Debug, PartialEq)]
+pub struct CustomStack<T>(Option<Rc<Node<T>>>);
 
-impl<T> Stack<T> for CustomStack<T> {
+impl<T: Clone> Stack<T> for CustomStack<T> {
     fn empty() -> Self {
-        CustomStack(Rc::new(Node::Nil))
+        CustomStack(None)
     }
 
     fn is_empty(&self) -> bool {
-        matches!(*self.0, Node::Nil)
+        self.0.is_none()
     }
 
     fn cons(head: T, tail: &Self) -> Self {
-        CustomStack(Rc::new(Node::Cons(head, Rc::clone(&tail.0))))
+        CustomStack(Some(Rc::new(Node {
+            head,
+            tail: tail.clone(),
+        })))
     }
 
     fn head(&self) -> Option<&T> {
-        match &*self.0 {
-            Node::Nil => None,
-            Node::Cons(x, _) => Some(x),
-        }
+        self.0.as_ref().map(|node| &node.head)
     }
 
-    fn tail(&self) -> Option<Self> {
-        match &*self.0 {
-            Node::Nil => None,
-            Node::Cons(_, tail) => Some(CustomStack(Rc::clone(&tail))),
+    fn tail(&self) -> Option<&Self> {
+        self.0.as_ref().map(|node| &node.tail)
+    }
+
+    fn rev(&self) -> Self {
+        let mut result = Self::empty();
+        let mut current = self;
+        loop {
+            match current.head() {
+                None => break result,
+                Some(h) => {
+                    result = Self::cons(h.clone(), &result);
+                    current = current.tail().unwrap();
+                }
+            }
         }
     }
 }
@@ -82,7 +94,7 @@ mod tests {
 
     #[test]
     fn tail_returns_rest() {
-        assert_eq!(s(&[1, 2, 3]).tail(), Some(s(&[2, 3])));
+        assert_eq!(s(&[1, 2, 3]).tail(), Some(&s(&[2, 3])));
     }
 
     #[test]
