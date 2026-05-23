@@ -58,7 +58,7 @@ impl<T: Ord> LeftistHeapNode<T> {
 #[derive(Clone)]
 pub struct LeftistHeap<T>(Rc<LeftistHeapNode<T>>);
 
-impl<T: Ord + Clone> Heap for LeftistHeap<T> {
+impl<T: Ord> Heap for LeftistHeap<T> {
     type Element = T;
 
     fn empty() -> Self {
@@ -73,14 +73,14 @@ impl<T: Ord + Clone> Heap for LeftistHeap<T> {
         LeftistHeap(Rc::new(self.0.merge(&other.0)))
     }
 
-    fn insert(&self, item: &T) -> Self {
-        LeftistHeap(Rc::new(self.0.insert(&Rc::new(item.clone()))))
+    fn insert(&self, item: &Rc<T>) -> Self {
+        LeftistHeap(Rc::new(self.0.insert(item)))
     }
 
-    fn find_min(&self) -> Option<&Rc<T>> {
+    fn find_min(&self) -> Option<Rc<T>> {
         match &*self.0 {
             LeftistHeapNode::E => None,
-            LeftistHeapNode::T(_, x, _, _) => Some(x),
+            LeftistHeapNode::T(_, x, _, _) => Some(Rc::clone(x)),
         }
     }
 
@@ -100,7 +100,7 @@ mod tests {
         let mut result = Vec::new();
         let mut current = h.clone();
         while let Some(min) = current.find_min() {
-            result.push(**min);
+            result.push(*min);
             current = current.delete_min().unwrap();
         }
         result
@@ -116,51 +116,63 @@ mod tests {
 
     #[test]
     fn insert_not_empty() {
-        let h = LeftistHeap::empty().insert(&1);
+        let h = LeftistHeap::empty().insert(&Rc::new(1));
         assert!(!h.is_empty());
     }
 
     #[test]
     fn find_min_single() {
-        let h = LeftistHeap::empty().insert(&42);
-        assert_eq!(h.find_min().map(|rc| **rc), Some(42));
+        let h = LeftistHeap::empty().insert(&Rc::new(42));
+        assert_eq!(h.find_min(), Some(Rc::new(42)));
     }
 
     #[test]
     fn find_min_returns_smallest() {
-        let h = LeftistHeap::empty().insert(&3).insert(&1).insert(&2);
-        assert_eq!(h.find_min().map(|rc| **rc), Some(1));
+        let h = LeftistHeap::empty()
+            .insert(&Rc::new(3))
+            .insert(&Rc::new(1))
+            .insert(&Rc::new(2));
+        assert_eq!(h.find_min(), Some(Rc::new(1)));
     }
 
     #[test]
     fn delete_min_removes_smallest() {
-        let h = LeftistHeap::empty().insert(&3).insert(&1).insert(&2);
+        let h = LeftistHeap::empty()
+            .insert(&Rc::new(3))
+            .insert(&Rc::new(1))
+            .insert(&Rc::new(2));
         let h2 = h.delete_min().unwrap();
-        assert_eq!(h2.find_min().map(|rc| **rc), Some(2));
+        assert_eq!(h2.find_min(), Some(Rc::new(2)));
     }
 
     #[test]
     fn sorted_order() {
         let h = LeftistHeap::empty()
-            .insert(&5)
-            .insert(&3)
-            .insert(&8)
-            .insert(&1)
-            .insert(&4);
+            .insert(&Rc::new(5))
+            .insert(&Rc::new(3))
+            .insert(&Rc::new(8))
+            .insert(&Rc::new(1))
+            .insert(&Rc::new(4));
         assert_eq!(heap_to_sorted_vec(&h), vec![1, 3, 4, 5, 8]);
     }
 
     #[test]
     fn merge_two_heaps() {
-        let a = LeftistHeap::empty().insert(&5).insert(&1).insert(&3);
-        let b = LeftistHeap::empty().insert(&4).insert(&2).insert(&6);
+        let a = LeftistHeap::empty()
+            .insert(&Rc::new(5))
+            .insert(&Rc::new(1))
+            .insert(&Rc::new(3));
+        let b = LeftistHeap::empty()
+            .insert(&Rc::new(4))
+            .insert(&Rc::new(2))
+            .insert(&Rc::new(6));
         let merged = a.merge(&b);
         assert_eq!(heap_to_sorted_vec(&merged), vec![1, 2, 3, 4, 5, 6]);
     }
 
     #[test]
     fn merge_with_empty() {
-        let a = LeftistHeap::empty().insert(&1).insert(&2);
+        let a = LeftistHeap::empty().insert(&Rc::new(1)).insert(&Rc::new(2));
         let empty: LeftistHeap<i32> = LeftistHeap::empty();
         assert_eq!(heap_to_sorted_vec(&a.merge(&empty)), vec![1, 2]);
         assert_eq!(heap_to_sorted_vec(&empty.merge(&a)), vec![1, 2]);
@@ -169,17 +181,17 @@ mod tests {
     #[test]
     fn persistent_insert() {
         let h0 = LeftistHeap::empty();
-        let h1 = h0.insert(&2);
-        let h2 = h1.insert(&1);
-        assert_eq!(h1.find_min().map(|rc| **rc), Some(2));
-        assert_eq!(h2.find_min().map(|rc| **rc), Some(1));
+        let h1 = h0.insert(&Rc::new(2));
+        let h2 = h1.insert(&Rc::new(1));
+        assert_eq!(h1.find_min(), Some(Rc::new(2)));
+        assert_eq!(h2.find_min(), Some(Rc::new(1)));
     }
 
     #[test]
     fn persistent_delete() {
-        let h = LeftistHeap::empty().insert(&1).insert(&2);
+        let h = LeftistHeap::empty().insert(&Rc::new(1)).insert(&Rc::new(2));
         let h2 = h.delete_min().unwrap();
-        assert_eq!(h.find_min().map(|rc| **rc), Some(1));
-        assert_eq!(h2.find_min().map(|rc| **rc), Some(2));
+        assert_eq!(h.find_min(), Some(Rc::new(1)));
+        assert_eq!(h2.find_min(), Some(Rc::new(2)));
     }
 }
