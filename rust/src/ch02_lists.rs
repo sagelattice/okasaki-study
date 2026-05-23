@@ -6,6 +6,7 @@ pub trait Stack<T>: Sized {
     fn cons(head: T, tail: &Self) -> Self;
     fn head(&self) -> Option<&T>;
     fn tail(&self) -> Option<&Self>;
+    fn uncons(&self) -> Option<(&T, &Self)>;
     fn rev(&self) -> Self;
 }
 
@@ -40,6 +41,10 @@ impl<T: Clone> Stack<T> for CustomStack<T> {
 
     fn tail(&self) -> Option<&Self> {
         self.0.as_ref().map(|node| &node.tail)
+    }
+
+    fn uncons(&self) -> Option<(&T, &Self)> {
+        self.0.as_ref().map(|node| (&node.head, &node.tail))
     }
 
     fn rev(&self) -> Self {
