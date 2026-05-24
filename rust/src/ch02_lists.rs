@@ -1,53 +1,43 @@
 use std::rc::Rc;
 
-pub trait Stack<T>: Sized {
-    fn empty() -> Self;
-    fn is_empty(&self) -> bool;
-    fn cons(head: T, tail: &Self) -> Self;
-    fn head(&self) -> Option<&T>;
-    fn tail(&self) -> Option<&Self>;
-    fn uncons(&self) -> Option<(&T, &Self)>;
-    fn rev(&self) -> Self;
-}
-
 #[derive(Clone, PartialEq, Debug)]
 struct Node<T> {
     head: T,
-    tail: CustomStack<T>,
+    tail: List<T>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct CustomStack<T>(Option<Rc<Node<T>>>);
+pub struct List<T>(Option<Rc<Node<T>>>);
 
-impl<T: Clone> Stack<T> for CustomStack<T> {
-    fn empty() -> Self {
-        CustomStack(None)
+impl<T: Clone> List<T> {
+    pub fn empty() -> Self {
+        List(None)
     }
 
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.0.is_none()
     }
 
-    fn cons(head: T, tail: &Self) -> Self {
-        CustomStack(Some(Rc::new(Node {
+    pub fn cons(head: T, tail: &Self) -> Self {
+        List(Some(Rc::new(Node {
             head,
             tail: tail.clone(),
         })))
     }
 
-    fn head(&self) -> Option<&T> {
+    pub fn head(&self) -> Option<&T> {
         self.0.as_ref().map(|node| &node.head)
     }
 
-    fn tail(&self) -> Option<&Self> {
+    pub fn tail(&self) -> Option<&Self> {
         self.0.as_ref().map(|node| &node.tail)
     }
 
-    fn uncons(&self) -> Option<(&T, &Self)> {
+    pub fn uncons(&self) -> Option<(&T, &Self)> {
         self.0.as_ref().map(|node| (&node.head, &node.tail))
     }
 
-    fn rev(&self) -> Self {
+    pub fn rev(&self) -> Self {
         let mut result = Self::empty();
         let mut current = self;
         loop {
@@ -66,7 +56,7 @@ impl<T: Clone> Stack<T> for CustomStack<T> {
 mod tests {
     use super::*;
 
-    type S = CustomStack<i32>;
+    type S = List<i32>;
 
     fn s(xs: &[i32]) -> S {
         xs.iter().rev().fold(S::empty(), |acc, &x| S::cons(x, &acc))

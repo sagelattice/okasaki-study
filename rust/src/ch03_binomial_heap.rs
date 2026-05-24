@@ -1,4 +1,4 @@
-use crate::ch02_lists::{CustomStack, Stack};
+use crate::ch02_lists::List;
 use crate::sigs::Heap;
 use std::rc::Rc;
 
@@ -18,7 +18,7 @@ impl<T> Clone for Node<T> {
     }
 }
 
-type TreeList<T> = CustomStack<Node<T>>;
+type TreeList<T> = List<Node<T>>;
 
 impl<T: PartialOrd> Node<T> {
     fn new(rank: usize, element: &Rc<T>, children: TreeList<T>) -> Self {
@@ -29,71 +29,63 @@ impl<T: PartialOrd> Node<T> {
         }
     }
 
-    fn link(t1: Self, t2: Self) -> Self {
-        if t1.element <= t2.element {
+    fn link(&self, other: &Self) -> Self {
+        if self.element <= other.element {
             Self::new(
-                t1.rank + 1,
-                &t1.element,
-                CustomStack::cons(t2, &t1.children),
+                self.rank + 1,
+                &self.element,
+                List::cons(other.clone(), &self.children),
             )
         } else {
             Self::new(
-                t1.rank + 1,
-                &t2.element,
-                CustomStack::cons(t1, &t2.children),
+                self.rank + 1,
+                &other.element,
+                List::cons(self.clone(), &other.children),
             )
-        }
-    }
-
-    fn ins_tree(t: Self, ts: &TreeList<T>) -> TreeList<T> {
-        match ts.uncons() {
-            None => CustomStack::cons(t, &CustomStack::empty()),
-            Some((h, rest)) => {
-                if t.rank <= h.rank {
-                    CustomStack::cons(t, ts)
-                } else {
-                    Self::ins_tree(Self::link(t, h.clone()), rest)
-                }
-            }
-        }
-    }
-
-    fn merge(ts1: &TreeList<T>, ts2: &TreeList<T>) -> TreeList<T> {
-        match (ts1.uncons(), ts2.uncons()) {
-            (None, _) => ts2.clone(),
-            (_, None) => ts1.clone(),
-            (Some((t1, rest1)), Some((t2, rest2))) => {
-                if t1.rank < t2.rank {
-                    CustomStack::cons(t1.clone(), &Self::merge(rest1, ts2))
-                } else if t2.rank < t1.rank {
-                    CustomStack::cons(t2.clone(), &Self::merge(ts1, rest2))
-                } else {
-                    Self::ins_tree(
-                        Self::link(t1.clone(), t2.clone()),
-                        &Self::merge(rest1, rest2),
-                    )
-                }
-            }
         }
     }
 }
 
 impl<T: PartialOrd> TreeList<T> {
-    fn remove_min_tree(&self) -> Option<(Node<T>, Self)> {
+    fn ins_tree(&self, t: Node<T>) -> TreeList<T> {
         match self.uncons() {
-            None => None,
-            Some((t, rest)) => {
-                if rest.is_empty() {
-                    return Some((t.clone(), rest.clone()));
+            None => List::cons(t, &List::empty()),
+            Some((h, rest)) => {
+                if t.rank <= h.rank {
+                    List::cons(t, self)
+                } else {
+                    rest.ins_tree(t.link(h))
                 }
-                if let Some((u, urest)) = rest.remove_min_tree() {
-                    if t.element <= u.element {
-                        return Some((t.clone(), rest.clone()));
-                    } else {
-                        return Some((u, CustomStack::cons(t.clone(), &urest)));
-                    }
+            }
+        }
+    }
+
+    fn merge(&self, ts2: &TreeList<T>) -> TreeList<T> {
+        match (self.uncons(), ts2.uncons()) {
+            (None, _) => ts2.clone(),
+            (_, None) => self.clone(),
+            (Some((t1, rest1)), Some((t2, rest2))) => {
+                if t1.rank < t2.rank {
+                    List::cons(t1.clone(), &rest1.merge(ts2))
+                } else if t2.rank < t1.rank {
+                    List::cons(t2.clone(), &self.merge(rest2))
+                } else {
+                    rest1.merge(rest2).ins_tree(t1.link(t2))
                 }
-                None
+            }
+        }
+    }
+
+    fn remove_min_tree(&self) -> Option<(Node<T>, Self)> {
+        let (t, rest) = self.uncons()?;
+        if rest.is_empty() {
+            Some((t.clone(), rest.clone()))
+        } else {
+            let (u, urest) = rest.remove_min_tree()?;
+            if t.element <= u.element {
+                Some((t.clone(), rest.clone()))
+            } else {
+                Some((u, List::cons(t.clone(), &urest)))
             }
         }
     }
@@ -106,7 +98,7 @@ impl<T: PartialOrd> Heap for BinomialHeap<T> {
     type Element = T;
 
     fn empty() -> Self {
-        BinomialHeap(CustomStack::empty())
+        BinomialHeap(List::empty())
     }
 
     fn is_empty(&self) -> bool {
@@ -114,14 +106,11 @@ impl<T: PartialOrd> Heap for BinomialHeap<T> {
     }
 
     fn insert(&self, item: &Rc<Self::Element>) -> Self {
-        BinomialHeap(Node::ins_tree(
-            Node::new(0, item, CustomStack::empty()),
-            &self.0,
-        ))
+        BinomialHeap(self.0.ins_tree(Node::new(0, item, List::empty())))
     }
 
     fn merge(&self, other: &Self) -> Self {
-        BinomialHeap(Node::merge(&self.0, &other.0))
+        BinomialHeap(self.0.merge(&other.0))
     }
 
     fn find_min(&self) -> Option<Rc<Self::Element>> {
@@ -131,7 +120,7 @@ impl<T: PartialOrd> Heap for BinomialHeap<T> {
     fn delete_min(&self) -> Option<Self> {
         self.0
             .remove_min_tree()
-            .map(|(node, ts)| BinomialHeap(Node::merge(&node.children.rev(), &ts)))
+            .map(|(node, ts)| BinomialHeap(node.children.rev().merge(&ts)))
     }
 }
 
