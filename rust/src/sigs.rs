@@ -16,3 +16,12 @@ pub trait Heap: Sized {
     fn find_min(&self) -> Option<Rc<Self::Element>>;
     fn delete_min(&self) -> Option<Self>;
 }
+
+pub trait Queue: Sized {
+    type Item;
+    fn empty() -> Self;
+    fn is_empty(&self) -> bool;
+    fn snoc(&self, item: &Rc<Self::Item>) -> Self;
+    fn head(&self) -> Option<Rc<Self::Item>>;
+    fn tail(&self) -> Option<Self>;
+}
