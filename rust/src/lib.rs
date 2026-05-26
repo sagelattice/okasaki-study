@@ -5,6 +5,7 @@ pub mod ch03_leftist_heap;
 pub mod ch04_streams;
 pub mod ch05_batched_queue;
 pub mod ch05_splay_heap;
+pub mod ch06_bankers_queue;
 pub mod sigs;
 
 #[cfg(test)]
