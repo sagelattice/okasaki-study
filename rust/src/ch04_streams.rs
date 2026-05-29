@@ -2,18 +2,18 @@ use std::cell::LazyCell;
 use std::rc::Rc;
 
 type LazyInit<'a, T> = Box<dyn FnOnce() -> T + 'a>;
-struct Suspension<'a, T>(LazyCell<T, LazyInit<'a, T>>);
+pub struct Suspension<'a, T>(LazyCell<T, LazyInit<'a, T>>);
 
 impl<'a, T: 'a> Suspension<'a, T> {
-    fn new(f: impl FnOnce() -> T + 'a) -> Self {
+    pub fn lazy(f: impl FnOnce() -> T + 'a) -> Self {
         Suspension(LazyCell::new(Box::new(f)))
     }
 
-    fn done(t: T) -> Self {
+    pub fn done(t: T) -> Self {
         Suspension(LazyCell::new(Box::new(move || t)))
     }
 
-    fn force(&self) -> &T {
+    pub fn force(&self) -> &T {
         LazyCell::force(&self.0)
     }
 }
@@ -43,7 +43,7 @@ impl<'a, T: 'a> Stream<'a, T> {
     }
 
     pub fn lazy(f: impl FnOnce() -> StreamCell<'a, T> + 'a) -> Self {
-        Stream(Rc::new(Suspension::new(f)))
+        Stream(Rc::new(Suspension::lazy(f)))
     }
 
     pub fn cons(&self, head: &Rc<T>) -> Self {
