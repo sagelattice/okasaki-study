@@ -7,6 +7,7 @@ pub mod ch05_batched_queue;
 pub mod ch05_splay_heap;
 pub mod ch06_bankers_queue;
 pub mod ch06_lazy_binomial_heap;
+pub mod ch07_real_time_queue;
 pub mod sigs;
 
 #[cfg(test)]
