@@ -52,6 +52,30 @@ impl<T: Clone> List<T> {
     }
 }
 
+pub struct ListIter<T> {
+    cur: List<T>,
+}
+
+impl<T: Clone> Iterator for ListIter<T> {
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        let (head, tail) = match self.cur.uncons() {
+            None => return None,
+            Some((h, tl)) => (h.clone(), tl),
+        };
+        self.cur = tail.clone();
+        Some(head)
+    }
+}
+
+impl<T: Clone> IntoIterator for List<T> {
+    type Item = T;
+    type IntoIter = ListIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        ListIter { cur: self }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
