@@ -78,29 +78,68 @@ impl<'a, T: 'a> Stream<'a, T> {
     }
 
     pub fn reverse(&self) -> Self {
-        let mut acc = Self::nil();
-        let mut cur = self.clone();
-        loop {
-            let (x, rest) = match cur.force() {
-                Nil => return acc,
-                Cons(x, rest) => (Rc::clone(x), rest.clone()),
-            };
-            cur = rest;
-            let prev = acc;
-            acc = Self::lazy(move || Cons(x, prev));
-        }
+        let s = self.clone();
+        Self::lazy(move || {
+            let mut acc: StreamCell<'a, T> = Nil;
+            let mut cur = s;
+            loop {
+                match cur.force() {
+                    Nil => return acc,
+                    Cons(x, rest) => {
+                        let x = Rc::clone(x);
+                        cur = rest.clone();
+                        let prev = std::mem::replace(&mut acc, Nil);
+                        acc = Cons(x, Self::lazy(move || prev));
+                    }
+                }
+            }
+        })
     }
 
     pub fn append(&self, other: &Self) -> Self {
-        match self.force() {
-            Nil => other.clone(),
-            Cons(x, s) => {
-                let x = Rc::clone(x);
-                let s = s.clone();
-                let other = other.clone();
-                Self::lazy(move || Cons(x, s.append(&other)))
-            }
-        }
+        let s = self.clone();
+        let other = other.clone();
+        Self::lazy(move || match s.force() {
+            Nil => match other.force() {
+                Nil => Nil,
+                Cons(x, rest) => Cons(Rc::clone(x), rest.clone()),
+            },
+            Cons(x, rest) => Cons(Rc::clone(x), rest.append(&other)),
+        })
+    }
+}
+
+impl<'a, T: 'a> FromIterator<Rc<T>> for Stream<'a, T> {
+    fn from_iter<I: IntoIterator<Item = Rc<T>>>(iter: I) -> Stream<'a, T> {
+        iter.into_iter()
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
+            .fold(Stream::nil(), |acc, x| acc.cons(&x))
+    }
+}
+
+impl<'a, T: 'a> IntoIterator for Stream<'a, T> {
+    type Item = Rc<T>;
+    type IntoIter = StreamIter<'a, T>;
+    fn into_iter(self) -> Self::IntoIter {
+        StreamIter { cur: self }
+    }
+}
+
+pub struct StreamIter<'a, T> {
+    cur: Stream<'a, T>,
+}
+
+impl<'a, T: 'a> Iterator for StreamIter<'a, T> {
+    type Item = Rc<T>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let (head, tail) = match self.cur.force() {
+            Nil => return None,
+            Cons(x, rest) => (Rc::clone(x), rest.clone()),
+        };
+        self.cur = tail;
+        Some(head)
     }
 }
 
@@ -113,24 +152,11 @@ mod tests {
     type S = Stream<'static, i32>;
 
     fn s(xs: &[i32]) -> S {
-        xs.iter()
-            .rev()
-            .fold(S::nil(), |acc, &x| acc.cons(&Rc::new(x)))
+        xs.iter().map(|&x| Rc::new(x)).collect()
     }
 
     fn to_vec(s: &S) -> Vec<i32> {
-        let mut out = Vec::new();
-        let mut cur = s.clone();
-        loop {
-            let next = match cur.force() {
-                Nil => return out,
-                Cons(x, rest) => {
-                    out.push(**x);
-                    rest.clone()
-                }
-            };
-            cur = next;
-        }
+        s.clone().into_iter().map(|rc| *rc).collect()
     }
 
     #[test]
@@ -148,8 +174,29 @@ mod tests {
     }
 
     #[test]
-    fn helper_round_trip() {
+    fn from_iter_then_into_iter_round_trip() {
         assert_eq!(to_vec(&s(&[1, 2, 3])), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn collect_from_arbitrary_iterator() {
+        let xs: S = (1..=3).map(Rc::new).collect();
+        assert_eq!(to_vec(&xs), vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn for_loop_visits_each_element() {
+        let xs = s(&[1, 2, 3]);
+        let mut collected = Vec::new();
+        for x in xs.clone() {
+            collected.push(*x);
+        }
+        assert_eq!(collected, vec![1, 2, 3]);
+    }
+
+    #[test]
+    fn into_iter_empty() {
+        assert_eq!(S::nil().into_iter().count(), 0);
     }
 
     #[test]
