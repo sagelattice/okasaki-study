@@ -9,6 +9,7 @@ pub mod ch06_bankers_queue;
 pub mod ch06_lazy_binomial_heap;
 pub mod ch07_real_time_queue;
 pub mod ch07_scheduled_binomial_heap;
+pub mod ch08_bankers_deque;
 pub mod sigs;
 
 #[cfg(test)]
@@ -16,3 +17,6 @@ mod heap_test_helpers;
 
 #[cfg(test)]
 mod queue_test_helpers;
+
+#[cfg(test)]
+mod deque_test_helpers;

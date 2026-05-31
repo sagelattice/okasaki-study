@@ -25,3 +25,9 @@ pub trait Queue: Sized {
     fn head(&self) -> Option<Rc<Self::Item>>;
     fn tail(&self) -> Option<Self>;
 }
+
+pub trait Deque: Queue {
+    fn cons(&self, item: &Rc<Self::Item>) -> Self;
+    fn last(&self) -> Option<Rc<Self::Item>>;
+    fn init(&self) -> Option<Self>;
+}
