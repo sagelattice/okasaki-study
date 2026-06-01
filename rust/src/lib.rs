@@ -10,6 +10,7 @@ pub mod ch06_lazy_binomial_heap;
 pub mod ch07_real_time_queue;
 pub mod ch07_scheduled_binomial_heap;
 pub mod ch08_bankers_deque;
+pub mod ch08_hood_melville_queue;
 pub mod sigs;
 
 #[cfg(test)]
