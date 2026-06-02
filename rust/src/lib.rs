@@ -11,6 +11,7 @@ pub mod ch07_real_time_queue;
 pub mod ch07_scheduled_binomial_heap;
 pub mod ch08_bankers_deque;
 pub mod ch08_hood_melville_queue;
+pub mod ch08_real_time_deque;
 pub mod sigs;
 
 #[cfg(test)]
