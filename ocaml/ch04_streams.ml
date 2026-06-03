@@ -5,9 +5,10 @@ module Stream : STREAM = struct
   and 'a stream = 'a stream_cell Lazy.t
 
   let rec ( ++ ) s t =
-    match s with
-    | (lazy Nil) -> t
-    | (lazy (Cons (x, s'))) -> lazy (Cons (x, s' ++ t))
+    lazy
+      (match s with
+      | (lazy Nil) -> Lazy.force t
+      | (lazy (Cons (x, s'))) -> Cons (x, s' ++ t))
 
   let rec take n s =
     match (n, s) with
@@ -23,12 +24,12 @@ module Stream : STREAM = struct
     | n, (lazy (Cons (_, s'))) -> drop (n - 1) s'
 
   let reverse s =
-    let rec reverse' s' r =
-      match (s', r) with
-      | (lazy Nil), r -> r
-      | (lazy (Cons (x, rest))), r -> reverse' rest (lazy (Cons (x, r)))
+    let rec reverse' s' acc =
+      match s' with
+      | (lazy Nil) -> acc
+      | (lazy (Cons (x, rest))) -> reverse' rest (Cons (x, lazy acc))
     in
-    reverse' s (lazy Nil)
+    lazy (reverse' s Nil)
 
   let of_list xs =
     List.fold_right (fun x acc -> lazy (Cons (x, acc))) xs (lazy Nil)
