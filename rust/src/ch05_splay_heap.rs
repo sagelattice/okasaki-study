@@ -11,7 +11,7 @@ impl<T> Clone for SplayHeap<T> {
     }
 }
 
-impl<T: PartialOrd> SplayHeap<T> {
+impl<T: Ord> SplayHeap<T> {
     fn node(left: &Self, item: &Rc<T>, right: &Self) -> Self {
         Self(Some(Rc::new(Node(
             left.clone(),
@@ -55,7 +55,7 @@ impl<T: PartialOrd> SplayHeap<T> {
     }
 }
 
-impl<T: PartialOrd> Heap for SplayHeap<T> {
+impl<T: Ord> Heap for SplayHeap<T> {
     type Element = T;
     fn empty() -> Self {
         Self(None)
@@ -89,11 +89,7 @@ impl<T: PartialOrd> Heap for SplayHeap<T> {
         Some(match l.0.as_deref() {
             None => r.clone(),
             Some(Node(a, _, b)) if a.0.is_none() => Self::node(b, y, r),
-            Some(Node(a, x, b)) => Self::node(
-                &a.delete_min().unwrap(),
-                x,
-                &Self::node(b, y, r),
-            ),
+            Some(Node(a, x, b)) => Self::node(&a.delete_min().unwrap(), x, &Self::node(b, y, r)),
         })
     }
 }

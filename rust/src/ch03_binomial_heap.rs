@@ -20,7 +20,7 @@ impl<T> Clone for Node<T> {
 
 type TreeList<T> = List<Node<T>>;
 
-impl<T: PartialOrd> Node<T> {
+impl<T: Ord> Node<T> {
     fn new(rank: usize, element: &Rc<T>, children: TreeList<T>) -> Self {
         Self {
             rank,
@@ -46,7 +46,7 @@ impl<T: PartialOrd> Node<T> {
     }
 }
 
-impl<T: PartialOrd> TreeList<T> {
+impl<T: Ord> TreeList<T> {
     fn ins_tree(&self, t: Node<T>) -> TreeList<T> {
         match self.uncons() {
             None => List::cons(t, &List::empty()),
@@ -94,7 +94,7 @@ impl<T: PartialOrd> TreeList<T> {
 #[derive(Clone)]
 pub struct BinomialHeap<T>(TreeList<T>);
 
-impl<T: PartialOrd> Heap for BinomialHeap<T> {
+impl<T: Ord> Heap for BinomialHeap<T> {
     type Element = T;
 
     fn empty() -> Self {

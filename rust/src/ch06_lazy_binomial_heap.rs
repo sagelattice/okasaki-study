@@ -9,7 +9,7 @@ struct Node<T> {
     children: TreeList<T>,
 }
 
-impl<T: PartialOrd> Node<T> {
+impl<T: Ord> Node<T> {
     fn link(s: &Rc<Node<T>>, t: &Rc<Node<T>>) -> Rc<Self> {
         if s.element <= t.element {
             Rc::new(Self {
@@ -29,7 +29,7 @@ impl<T: PartialOrd> Node<T> {
 
 type TreeList<T> = List<Rc<Node<T>>>;
 
-impl<T: PartialOrd> TreeList<T> {
+impl<T: Ord> TreeList<T> {
     fn ins_tree(&self, node: &Rc<Node<T>>) -> Self {
         match self.uncons() {
             None => List::cons(Rc::clone(node), &List::empty()),
@@ -81,7 +81,7 @@ impl<'a, T> Clone for LazyBinomialHeap<'a, T> {
     }
 }
 
-impl<'a, T: PartialOrd + 'a> Heap for LazyBinomialHeap<'a, T> {
+impl<'a, T: Ord + 'a> Heap for LazyBinomialHeap<'a, T> {
     type Element = T;
     fn empty() -> Self {
         Self(Rc::new(Suspension::done(List::empty())))
