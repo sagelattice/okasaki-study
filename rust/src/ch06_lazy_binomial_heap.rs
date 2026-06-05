@@ -48,7 +48,7 @@ impl<T: Ord> TreeList<T> {
             (None, _) => other.clone(),
             (Some((s, ss)), Some((t, ts))) => {
                 if s.rank < t.rank {
-                    List::cons(Rc::clone(s), &ss.merge(ts))
+                    List::cons(Rc::clone(s), &ss.merge(other))
                 } else if t.rank < s.rank {
                     List::cons(Rc::clone(t), &self.merge(ts))
                 } else {
