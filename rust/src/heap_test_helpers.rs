@@ -104,6 +104,27 @@ pub fn repeated_equal_elements<H: Heap<Element = i32>>() {
     assert_eq!(h.delete_min().unwrap().find_min(), Some(r(1)));
 }
 
+// A heap is a multiset: every inserted element, including duplicates, is
+// retained and extractable. Draining must yield each key with its exact
+// multiplicity, so a bug that drops one of several equal elements is caught.
+pub fn duplicates_all_retained<H: Heap<Element = i32> + Clone>() {
+    let h = [1, 1, 2, 1]
+        .into_iter()
+        .fold(H::empty(), |acc, x| acc.insert(&r(x)));
+    assert_eq!(drain(&h), vec![1, 1, 1, 2]);
+}
+
+pub fn merge_preserves_duplicates<H: Heap<Element = i32> + Clone>() {
+    let h1 = H::empty().insert(&r(2)).insert(&r(1)).insert(&r(2));
+    let h2 = H::empty().insert(&r(1)).insert(&r(3)).insert(&r(1));
+    assert_eq!(drain(&h1.merge(&h2)), vec![1, 1, 1, 2, 2, 3]);
+}
+
+pub fn delete_min_removes_single_duplicate<H: Heap<Element = i32> + Clone>() {
+    let h = H::empty().insert(&r(1)).insert(&r(1)).insert(&r(2));
+    assert_eq!(drain(&h.delete_min().unwrap()), vec![1, 2]);
+}
+
 macro_rules! heap_tests {
     ($heap:ty) => {
         #[test]
@@ -169,6 +190,18 @@ macro_rules! heap_tests {
         #[test]
         fn repeated_equal_elements() {
             $crate::heap_test_helpers::repeated_equal_elements::<$heap>();
+        }
+        #[test]
+        fn duplicates_all_retained() {
+            $crate::heap_test_helpers::duplicates_all_retained::<$heap>();
+        }
+        #[test]
+        fn merge_preserves_duplicates() {
+            $crate::heap_test_helpers::merge_preserves_duplicates::<$heap>();
+        }
+        #[test]
+        fn delete_min_removes_single_duplicate() {
+            $crate::heap_test_helpers::delete_min_removes_single_duplicate::<$heap>();
         }
     };
 }
